@@ -6,7 +6,7 @@ def hf_generate_image(prompt: str):
     try:
         client = InferenceClient(
             "stabilityai/stable-diffusion-xl-base-1.0",
-            token="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"
+            token=""
         )
         image = client.text_to_image(prompt)
 
