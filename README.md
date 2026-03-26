@@ -28,27 +28,8 @@ Pulls images from search results and injects them into output
 
 
 🏗️ Architecture
-User Prompt
-     │
-     ▼
-Intent Classifier
-     │
-     ▼
-Task Router ───────────────┐
-     │                     │
-     ▼                     ▼
- Text API             Code API
- Image API            Search API
-     │                     │
-     └───────┬─────────────┘
-             ▼
-      Parallel Execution
-             ▼
-        Aggregation
-             ▼
-         Final Output
-
-
+User Prompt  -> Intent Classifier-> Task Router ->Text API with image API and code API with search API in Parallel Execution , Aggregation = Final Output
+     
          
 🧪 Example Flow
 
