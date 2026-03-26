@@ -43,3 +43,8 @@ Code generator API
 Text generator API
 Runs both in parallel
 Returns combined output
+
+## 🚫 License
+
+This project is proprietary software.
+Unauthorized use, copying, or distribution is strictly prohibited.
