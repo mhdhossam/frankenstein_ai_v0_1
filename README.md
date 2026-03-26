@@ -24,6 +24,9 @@ SHA256-based caching system to avoid repeated API calls
 Fallback logic when external APIs are unavailable
 🖼️ Auto Image Extraction
 Pulls images from search results and injects them into output
+
+
+
 🏗️ Architecture
 User Prompt
      │
@@ -44,11 +47,12 @@ Task Router ───────────────┐
         Aggregation
              ▼
          Final Output
+
+
+         
 🧪 Example Flow
 
-Input:
-
-"Generate a Python function and explain it"
+   Input:  "Generate a Python function and explain it"
 
 System Behavior:
 
