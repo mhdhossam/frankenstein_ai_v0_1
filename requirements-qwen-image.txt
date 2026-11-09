@@ -1,0 +1,8 @@
+# Optional dependencies for the local Qwen-Image-2.1 backend.
+# Install into the same environment as Frankenstein AI.
+torch>=2.4.0
+transformers>=5.17.0
+accelerate>=1.0.0
+pillow>=10.0.0
+huggingface_hub>=0.25.0
+git+https://github.com/huggingface/diffusers
