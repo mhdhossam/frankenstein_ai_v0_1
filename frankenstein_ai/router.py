@@ -49,7 +49,9 @@ def classify_intent(prompt: str):
 
 # ---------------------- Caching ----------------------
 def cache_key(kind, prompt):
-    return hashlib.sha256(f"{kind}:{prompt}".encode("utf-8")).hexdigest()
+    # Keep outputs from different image backends from colliding in the cache.
+    provider = IMAGE_PROVIDER if kind == "image" else ""
+    return hashlib.sha256(f"{kind}:{provider}:{prompt}".encode("utf-8")).hexdigest()
 
 def run_tool(kind, prompt):
     key = cache_key(kind, prompt)
