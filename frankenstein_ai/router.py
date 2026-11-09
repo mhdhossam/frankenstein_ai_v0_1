@@ -23,11 +23,23 @@ def save_cache():
         json.dump(CACHE, f, indent=2)
 
 OFFLINE_MODE = os.getenv("OFFLINE_MODE","").lower() in ("1","true","yes")
+IMAGE_PROVIDER = os.getenv("IMAGE_PROVIDER", "hf").strip().lower()
+
+def generate_image(prompt: str):
+    """Dispatch image generation to the configured provider."""
+    if IMAGE_PROVIDER in {"qwen", "qwen-image", "qwen-image-2.1"}:
+        from .boosters.qwen_image import qwen_generate_image
+        return qwen_generate_image(prompt, output_dir=IMAGES_DIR)
+    return hf_generate_image(prompt)
 
 # ---------------------- Classification ----------------------
 def classify_intent(prompt: str):
     p = prompt.lower()
-    if any(k in p for k in ["generate image","draw","sd:","stable diffusion"]):
+    if any(k in p for k in [
+        "generate image", "create image", "make an image", "draw",
+        "image edit", "edit this image", "sd:", "stable diffusion",
+        "qwen image", "qwen-image"
+    ]):
         return ["image"]
     if any(k in p for k in ["code","python","script","function","bug","class"]):
         return ["code","text"]
@@ -52,7 +64,9 @@ def run_tool(kind, prompt):
         elif kind == "code":
             result = hf_generate_code(prompt)
         elif kind == "image":
-            result = hf_generate_image(prompt)
+            # Qwen is a local backend when selected; the legacy HF provider
+            # remains unchanged for backward compatibility.
+            result = generate_image(prompt)
         elif kind == "search":
             result = {"text": f"(offline) Search stub: {prompt}", "images": [], "provider": "stub-duckduckgo"}
         else:
@@ -63,7 +77,7 @@ def run_tool(kind, prompt):
         elif kind == "code":
             result = hf_generate_code(prompt)
         elif kind == "image":
-            result = hf_generate_image(prompt)
+            result = generate_image(prompt)
         elif kind == "search":
             result = instant_answer(prompt)
         else:
@@ -89,32 +103,7 @@ def route_and_run(prompt: str, num_images: int = 1):
     search_results = [r for r in out if r["kind"] == "search"]
     for sr in search_results:
         for img in sr["result"].get("images", []):
-            out.append({"kind": "image", "result": {"url": img.get("url"), "prompt": img.get("title")}})
-
-    # Save cache once after all threads are done
-    save_cache()
-
-    return out
-
-
-# ---------------------- Main Router ----------------------
-def route_and_run(prompt: str, num_images: int = 1):
-    kinds = classify_intent(prompt)
-    if "text" not in kinds:
-        kinds.append("text")
-
-    out = []
-    with ThreadPoolExecutor(max_workers=len(kinds)) as ex:
-        futs = [ex.submit(run_tool, k, prompt) for k in kinds]
-        for f in as_completed(futs):
-            out.append(f.result())
-
-    # Handle search images automatically
-    search_results = [r for r in out if r["kind"] == "search"]
-    for sr in search_results:
-        for img in sr["result"].get("images", []):
             out.append({"kind": "image", "result": {"path": img.get("url"), "prompt": img.get("title")}})
 
     save_cache()
     return out
-
